@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Classe Dao[Course]
+Classe Dao[Student]
 """
 
 from models.student import Student
@@ -38,27 +38,27 @@ class StudentDao(Dao[Student]):
         ...
         return student_id
 
-    def read(self, id_course: int) -> Optional[Course]:
-        """Renvoit le cours correspondant à l'entité dont l'id est id_course
+    def read(self, id_person: int) -> Optional[Person]:
+        """Renvoit le student correspondant à l'entité dont l'id est id_person
            (ou None s'il n'a pu être trouvé)"""
-        course: Optional[Course]
+        course: Optional[Person]
 
         with Dao.connection.cursor() as cursor:
-            sql = "SELECT * FROM course WHERE id_course=%s"
-            cursor.execute(sql, (id_course,))
+            sql = "SELECT * FROM person WHERE id_person=%s"
+            cursor.execute(sql, (id_person,))
             record = cursor.fetchone()
         if record is not None:
-            course = Course(record['name'], record['start_date'], record['end_date'])
-            course.id = record['id_course']
+            person = Person(record['first_name'], record['last_name'], record['age'])
+            person.id = record['id_person']
         else:
-            course = None
+            person = None
 
-        return course
+        return person
 
-    def update(self, course: Course) -> bool:
-        """Met à jour en BD l'entité Course correspondant à course, pour y correspondre
+    def update(self, student: Person) -> bool:
+        """Met à jour en BD l'entité Person correspondant à student, pour y correspondre
 
-        :param course: cours déjà mis à jour en mémoire
+        :param student: student déjà mis à jour en mémoire
         :return: True si la mise à jour a pu être réalisée
         """
 
@@ -66,13 +66,13 @@ class StudentDao(Dao[Student]):
 
         with Dao.connection.cursor() as cursor:
 
-            sql = "UPDATE course SET name = %s WHERE id_course = %s)"
+            sql = "UPDATE person SET first_name = %s, last_name = %s, age = %s WHERE id_person = %s)"
 
             try:
-                cursor.execute(sql, (course.name, course.id))
+                cursor.execute(sql, (student.first_name, student.last_name, student.age, student.id_person))
                 Dao.connection.commit()
             except Dao.connection.IntegrityError:
-                print("Course already exists!")
+                print("Student already exists!")
                 update_boolean = False
             except Dao.connection.DatabaseError as error:
                 print(error)
@@ -81,10 +81,10 @@ class StudentDao(Dao[Student]):
         ...
         return update_boolean
 
-    def delete(self, course: Course) -> bool:
-        """Supprime en BD l'entité Course correspondant à course
+    def delete(self, student: Person) -> bool:
+        """Supprime en BD l'entité Person correspondant à student
 
-        :param course: cours dont l'entité Course correspondante est à supprimer
+        :param student: student dont l'entité Person correspondante est à supprimer
         :return: True si la suppression a pu être réalisée
         """
 
@@ -92,10 +92,10 @@ class StudentDao(Dao[Student]):
 
         with Dao.connection.cursor() as cursor:
 
-            sql = "DELETE FROM course WHERE id_course = %s)"
+            sql = "DELETE FROM person WHERE id_person = %s)"
 
             try:
-                cursor.execute(sql, (course.id,))
+                cursor.execute(sql, (student.id_person,))
                 Dao.connection.commit()
             except Dao.connection.IntegrityError as error:
                 print(error)
