@@ -52,6 +52,24 @@ class AddressDao(Dao[Address]):
 
         return address
 
+    def readall(self) -> list:
+        """Renvoit les adresses correspondant à l'entité Address
+           (ou None s'il n'a pu être trouvé)"""
+
+        addresses: list = []
+
+        with Dao.connection.cursor() as cursor:
+            sql = "SELECT * FROM address"
+            cursor.execute(sql)
+            record = cursor.fetchall()
+        if record is not None:
+            for row in record:
+                addresses = Address(row['street'], row['city'], row['postal_code'])
+        else:
+            addresses = None
+
+        return addresses
+
     def update(self, address: Address) -> None:
         """Met à jour en BD l'entité Address correspondant à address, pour y correspondre
 
