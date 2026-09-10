@@ -10,6 +10,8 @@ from daos.dao import Dao
 from dataclasses import dataclass
 from typing import Optional
 
+from models.teacher import Teacher
+
 
 @dataclass
 class StudentDao(Dao[Student]):
@@ -44,16 +46,34 @@ class StudentDao(Dao[Student]):
         course: Optional[Person]
 
         with Dao.connection.cursor() as cursor:
-            sql = "SELECT * FROM person WHERE id_person=%s"
+            sql = "SELECT * FROM person INNER JOIN student ON person.id_person = student.id_person WHERE id_person=%s"
             cursor.execute(sql, (id_person,))
             record = cursor.fetchone()
         if record is not None:
-            person = Person(record['first_name'], record['last_name'], record['age'])
+            person = Teacher(record['first_name'], record['last_name'], record['age'])
             person.id = record['id_person']
         else:
             person = None
 
         return person
+
+    def readall(self) -> list:
+        """Renvoit les students correspondant à l'entité Student
+           (ou None s'il n'a pu être trouvé)"""
+
+        students: list = []
+
+        with Dao.connection.cursor() as cursor:
+            sql = "SELECT * FROM person INNER JOIN student ON person.id_person = student.id_person"
+            cursor.execute(sql)
+            record = cursor.fetchall()
+        if record is not None:
+            for row in record:
+                students = Student(row['first_name'], row['last_name'], row['age'])
+        else:
+            students = None
+
+        return students
 
     def update(self, student: Person) -> bool:
         """Met à jour en BD l'entité Person correspondant à student, pour y correspondre
