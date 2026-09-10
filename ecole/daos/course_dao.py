@@ -65,10 +65,10 @@ class CourseDao(Dao[Course]):
 
         with Dao.connection.cursor() as cursor:
 
-            sql = "UPDATE course SET name = %s WHERE id_course = %s)"
+            sql = "UPDATE course SET name = %s, star_date = %s, end_date = %s WHERE id_course = %s)"
 
             try:
-                cursor.execute(sql, (course.name, course.id))
+                cursor.execute(sql, (course.name, course.start_date, course.end_date, course.id))
                 Dao.connection.commit()
             except Dao.connection.IntegrityError:
                 print("Course already exists!")
