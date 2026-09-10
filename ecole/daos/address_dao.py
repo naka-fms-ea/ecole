@@ -46,11 +46,11 @@ class AddressDao(Dao[Address]):
             record = cursor.fetchone()
         if record is not None:
             address = Address(record['street'], record['city'], record['postal_code'])
-            address.id = record['id_course']
+            address.id = record['id_address']
         else:
-            course = None
+            address = None
 
-        return course
+        return address
 
     def update(self, address: Address) -> None:
         """Met à jour en BD l'entité Address correspondant à address, pour y correspondre
@@ -63,10 +63,10 @@ class AddressDao(Dao[Address]):
 
         with Dao.connection.cursor() as cursor:
 
-            sql = "UPDATE address SET street = %s WHERE id_address = %s)"
+            sql = "UPDATE address SET street = %s, city = %s, postal_code = %s WHERE id_address = %s)"
 
             try:
-                cursor.execute(sql, (address.street, address.id))
+                cursor.execute(sql, (address.street, address.city, address.postal_code, address.id))
                 Dao.connection.commit()
             except Dao.connection.IntegrityError:
                 print("Address already exists!")
