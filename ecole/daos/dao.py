@@ -35,6 +35,12 @@ class Dao[T](ABC):
         ...
 
     @abstractmethod
+    def readall(self) -> list:
+        """Renvoit les objets correspondant à l'entité
+           (ou None s'il n'a pu être trouvé)"""
+        ...
+
+    @abstractmethod
     def update(self, obj: T) -> bool:
         """Met à jour en BD l'entité correspondant à obj, pour y correspondre
 
