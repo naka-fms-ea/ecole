@@ -58,16 +58,34 @@ class TeacherDao(Dao[Teacher]):
         teacher: Optional[Teacher]
 
         with Dao.connection.cursor() as cursor:
-            sql = "SELECT * FROM person WHERE id_person=%s"
+            sql = "SELECT * FROM person INNER JOIN teacher ON person.id_person = teacher.id_person WHERE id_person=%s"
             cursor.execute(sql, (id_person,))
             record = cursor.fetchone()
         if record is not None:
-            teacher = Teacher(record['first_name'], record['last_name'], record['age'])
+            teacher = Teacher(record['first_name'], record['last_name'], record['age'], record['hiring_date'])
             teacher.id = record['id_person']
         else:
-            person = None
+            teacher = None
 
         return teacher
+
+    def readall(self) -> list:
+        """Renvoit les teachers correspondant à l'entité Teacher
+           (ou None s'il n'a pu être trouvé)"""
+
+        teachers: list = []
+
+        with Dao.connection.cursor() as cursor:
+            sql = "SELECT * FROM person INNER JOIN teacher ON person.id_person = teacher.id_person"
+            cursor.execute(sql)
+            record = cursor.fetchall()
+        if record is not None:
+            for row in record:
+                teachers = Teacher(row['first_name'], row['last_name'], row['age'], row['hiring_date'])
+        else:
+            teachers = None
+
+        return teachers
 
     def update(self, teacher: Teacher) -> bool:
         """Met à jour en BD l'entité Teacher correspondant à teacher, pour y correspondre
