@@ -43,16 +43,34 @@ class CourseDao(Dao[Course]):
         course: Optional[Course]
         
         with Dao.connection.cursor() as cursor:
-            sql = "SELECT * FROM course WHERE id_course=%s"
+            sql = "SELECT * FROM course INNER JOIN teacher ON course.id_teacher = teacher.id_teacher INNER JOIN person ON teacher.id_person = person.id_person WHERE id_course = %s"
             cursor.execute(sql, (id_course,))
             record = cursor.fetchone()
         if record is not None:
-            course = Course(record['name'], record['start_date'], record['end_date'])
+            course = Course(record['name'], record['start_date'], record['end_date'], record['first_name'], record['last_name'])
             course.id = record['id_course']
         else:
             course = None
 
         return course
+
+    def readall(self) -> list:
+        """Renvoit les courses correspondant à l'entité Course
+           (ou None s'il n'a pu être trouvé)"""
+
+        courses: list = []
+
+        with Dao.connection.cursor() as cursor:
+            sql = "SELECT * FROM course INNER JOIN teacher ON course.id_teacher = teacher.id_teacher INNER JOIN person ON teacher.id_person = person.id_person"
+            cursor.execute(sql)
+            record = cursor.fetchall()
+        if record is not None:
+            for row in record:
+                courses = Course(row['name'], row['start_date'], row['end_date'], row['first_name'], row['last_name'])
+        else:
+            courses = None
+
+        return courses
 
     def update(self, course: Course) -> bool:
         """Met à jour en BD l'entité Course correspondant à course, pour y correspondre
